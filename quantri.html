@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý đăng ký xe máy</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background: #2d6cdf;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.6em;
+      letter-spacing: 1px;
+    }
+
+    main {
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .form-section, .table-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-weight: bold;
+      min-width: 90px;
+    }
+
+    input {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .button-group {
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #2d6cdf;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #184fb8;
+    }
+
+    .search-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    select, .search-input {
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: #2d6cdf;
+      color: white;
+      padding: 10px;
+    }
+
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    tr:hover {
+      background: #eef4ff;
+    }
+
+    .footer {
+      text-align: right;
+      font-style: italic;
+      padding: 10px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Khi tải trang, kiểm tra xem localStorage đã có dữ liệu chưa
+    if (!localStorage.getItem("xe")) {
+      fetch("./Data/data.json")
+        .then(res => res.json())
+        .then(data => {
+          // Lưu vào localStorage
+          localStorage.setItem("xe", JSON.stringify(data));
+          console.log("Dữ liệu đã nạp từ data.json vào localStorage:", data);
+        })
+        .catch(err => console.error("Lỗi khi tải data.json:", err));
+    } else {
+      console.log("Dữ liệu đã có sẵn trong localStorage, không cần nạp lại.");
+    }
+  </script>
+
+  <!-- Sau đó mới nạp các file JS khác -->
+  <script src="./Scripts/crud.js"></script>
+  <script src="./Scripts/search.js"></script>
+  <header>🚘 Quản lý đăng ký xe máy</header>
+
+  <main>
+
+    <!-- KHU VỰC NHẬP THÔNG TIN -->
+    <section class="form-section">
+      <h2>📄 Thông tin đăng ký xe</h2>
+
+      <div class="form-row">
+        <label for="ten">Tên chủ xe</label>
+        <input id="ten" type="text" placeholder="Nhập tên chủ xe">
+        <label for="diachi">Địa chỉ</label>
+        <input id="diachi" type="text" placeholder="Nhập địa chỉ">
+      </div>
+
+      <div class="form-row">
+        <label for="cmnd">Số CMND</label>
+        <input id="cmnd" type="text" placeholder="Nhập số CMND">
+        <label for="bienso">Biển số</label>
+        <input id="bienso" type="text" placeholder="Nhập biển số xe">
+      </div>
+
+      <div class="button-group">
+        <button id="addBtn">Thêm</button>
+        <button id="editBtn">Sửa</button>
+        <button id="deleteBtn">Xóa</button>
+        <button id="viewRequestBtn">Xem yêu cầu</button>
+      </div>
+    </section>
+
+    <!-- KHU VỰC TÌM KIẾM -->
+    <section class="form-section">
+      <h2>🔍 Tìm kiếm</h2>
+      <div class="search-section">
+        <select id="searchType">
+          <option value="ten">Theo tên</option>
+          <option value="bienso">Theo biển số</option>
+          <option value="diachi">Theo quê quán</option>
+        </select>
+        <input class="search-input" id="searchInput" type="text" placeholder="Nhập từ khóa...">
+      </div>
+    </section>
+
+    <!-- KHU VỰC DANH SÁCH -->
+    <section class="table-section">
+      <h2>📋 Danh sách xe đã đăng ký</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Tên chủ xe</th>
+            <th>Địa chỉ</th>
+            <th>Số CMND</th>
+            <th>Biển số</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Dữ liệu sẽ được JS render -->
+        </tbody>
+      </table>
+      <div class="footer" id="countLabel">Tổng số xe: 0</div>
+    </section>
+
+    <section class="table-section" id="requestSection" style="display:none;">
+  <h2>📨 Danh sách yêu cầu phản hồi</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Ảnh</th>
+        <th>Họ và tên</th>
+        <th>CMND</th>
+        <th>Quê quán</th>
+        <th>Ngày sinh</th>
+      </tr>
+    </thead>
+    <tbody id="requestBody"></tbody>
+  </table>
+</section>
+
+
+
+  </main>
+
+  <!-- KẾT NỐI FILE JS -->
+  <script type="module">
+    import { renderTable, themXe, suaXe, xoaXe } from "./Scripts/crud.js";
+    import { timTheoTen, timTheoBienSo, timTheoQueQuan } from "./Scripts/search.js";
+
+    document.getElementById("viewRequestBtn").onclick = () => {
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  const filtered = users.filter(u => u.phanhoi === 1);
+
+  const body = document.getElementById("requestBody");
+  const section = document.getElementById("requestSection");
+  body.innerHTML = "";
+
+  if (filtered.length === 0) {
+    body.innerHTML = `<tr><td colspan="5" style="text-align:center;color:gray;">Không có yêu cầu nào</td></tr>`;
+  } else {
+    filtered.forEach(u => {
+      const tr = document.createElement("tr");
+
+      const imgSrc = u.imageBase64 || "./default-avatar.png"; // ảnh mặc định nếu chưa có
+
+      tr.innerHTML = `
+        <td style="text-align:center;"><img src="${imgSrc}" alt="avatar" width="60" height="60" style="border-radius:50%;object-fit:cover;"></td>
+        <td>${u.ten}</td>
+        <td>${u.cmnd}</td>
+        <td>${u.quequan}</td>
+        <td>${u.ngaysinh}</td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  section.style.display = "block";
+  section.scrollIntoView({ behavior: "smooth" });
+};
+
+    // Khởi tạo bảng khi tải trang
+    renderTable();
+
+    // Gán các sự kiện CRUD
+    document.getElementById("addBtn").onclick = () => {
+      capNhatPhanHoi(cmnd.value,ten.value,diachi.value);
+      themXe(ten.value, diachi.value, cmnd.value, bienso.value);
+
+      
+      document.getElementById("viewRequestBtn").onclick();
+      capNhatTongXe();
+    };
+
+    document.getElementById("editBtn").onclick = () => {
+      suaXe(ten.value, diachi.value, cmnd.value, bienso.value);
+      capNhatTongXe();
+    };
+
+    document.getElementById("deleteBtn").onclick = () => {
+      xoaXe();
+      capNhatTongXe();
+    };
+
+    // document.getElementById("printBtn").onclick = () => {
+    //   window.print();
+    // };
+
+    // Tìm kiếm động
+    const searchInput = document.getElementById("searchInput");
+    const searchType = document.getElementById("searchType");
+
+    searchInput.addEventListener("input", () => {
+      const val = searchInput.value.trim();
+      const type = searchType.value;
+
+      if (val === "") {
+        renderTable();
+        return;
+      }
+
+      if (type === "ten") timTheoTen(val);
+      else if (type === "bienso") timTheoBienSo(val);
+      else timTheoQueQuan(val);
+    });
+
+    // Cập nhật tổng số xe
+    function capNhatTongXe() {
+      const data = JSON.parse(localStorage.getItem("xe")) || [];
+      document.getElementById("countLabel").textContent = `Tổng số xe: ${data.length}`;
+    }
+
+    capNhatTongXe();
+    // --- Xem yêu cầu phản hồi ---
+document.getElementById("viewRequestBtn").onclick = () => {
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  const filtered = users.filter(u => u.phanhoi === 1);
+
+  const body = document.getElementById("requestBody");
+  const section = document.getElementById("requestSection");
+  body.innerHTML = "";
+
+  if (filtered.length === 0) {
+    body.innerHTML = `<tr><td colspan="5" style="text-align:center;color:gray;">Không có yêu cầu nào</td></tr>`;
+  } else {
+    filtered.forEach(u => {
+      const tr = document.createElement("tr");
+
+      const imgSrc = u.avatar || "./default-avatar.png";
+
+      tr.innerHTML = `
+        <td style="text-align:center;"><img src="${imgSrc}" alt="avatar" width="60" height="60" style="border-radius:50%;object-fit:cover;"></td>
+        <td>${u.ten}</td>
+        <td>${u.cmnd}</td>
+        <td>${u.quequan}</td>
+        <td>${u.ngaysinh}</td>
+      `;
+
+      // 👇 Khi click vào hàng => tự động điền thông tin vào form
+      tr.addEventListener("click", () => {
+        document.getElementById("ten").value = u.ten;
+        document.getElementById("cmnd").value = u.cmnd;
+        document.getElementById("diachi").value = u.quequan;
+        // Biển số vẫn để trống để admin tự nhập
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      body.appendChild(tr);
+    });
+  }
+
+  section.style.display = "block";
+  section.scrollIntoView({ behavior: "smooth" });
+};
+
+
+  </script>
+  <script>
+    function capNhatPhanHoi(cmnd, hoten, diachi) {
+  // Lấy danh sách người dùng từ localStorage
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+
+  // Tìm user có cùng cmnd, họ tên và địa chỉ
+  for (let i = 0; i < users.length; i++) {
+    if (
+      users[i].cmnd === cmnd &&
+      users[i].ten === hoten &&
+      users[i].quequan === diachi
+    ) {
+      users[i].phanhoi = 0; // cập nhật lại phanhoi
+      console.log("Tim thay");
+
+      break;
+    }
+  }
+
+  // Lưu lại danh sách users sau khi chỉnh sửa
+  localStorage.setItem("users", JSON.stringify(users));
+};
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Thông tin người dùng</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #eef2f7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Thanh tiêu đề */
+    .header {
+      width: 100%;
+      background-color: #2d6cdf;
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 420px;
+      margin-top: 60px;
+      padding: 30px 40px;
+    }
+
+    h2 {
+      color: #2d6cdf;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    input:disabled {
+      background-color: #f0f0f0;
+      color: #555;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2d6cdf;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #184fb8;
+    }
+
+    small {
+      color: #666;
+      font-size: 0.85em;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>ĐĂNG KÝ XE MÁY TRỰC TUYẾN</h1>
+  </div>
+
+  <div class="container">
+    <h2>Thông tin người dùng</h2>
+
+    <label for="cmnd">Số CMND:</label>
+    <input type="text" id="cmnd" disabled>
+
+    <label for="name">Họ và tên:</label>
+    <input type="text" id="name" disabled>
+
+    <label for="dob">Ngày sinh:</label>
+    <input type="text" id="dob" disabled>
+
+    <label for="address">Quê quán:</label>
+    <input type="text" id="address" disabled>
+
+    <label for="email">Địa chỉ Email:</label>
+    <input type="email" id="email" placeholder="Nhập địa chỉ email của bạn" required>
+
+    <label for="phone">Số điện thoại:</label>
+    <input type="tel" id="phone" placeholder="Nhập số điện thoại của bạn" required>
+
+    <label for="imageUpload">Ảnh cá nhân (bắt buộc, dưới 2MB):</label>
+    <input type="file" id="imageUpload" accept="image/*">
+    <small>Chỉ chấp nhận tệp ảnh dưới 2MB</small>
+
+    <button id="registerBtn">Đăng ký xe máy</button>
+    <button onclick="logout()">Đăng xuất</button>
+  </div>
+
+  <script>
+    // Lấy thông tin người dùng hiện tại từ localStorage
+    let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!currentUser) {
+      alert("Bạn chưa đăng nhập!");
+      window.location.href = "index.html";
+    } else {
+      document.getElementById("cmnd").value = currentUser.cmnd || "";
+      document.getElementById("name").value = currentUser.ten || "";
+      document.getElementById("dob").value = currentUser.ngaysinh || "";
+      document.getElementById("address").value = currentUser.quequan || "";
+    }
+
+    document.getElementById("registerBtn").addEventListener("click", () => {
+  if (currentUser.phanhoi === 1) {
+    alert("Hồ sơ của bạn đã được gửi đi và đang được xét duyệt. Vui lòng chờ phản hồi qua email.");
+    return;
+  }
+
+  const email = document.getElementById("email").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const fileInput = document.getElementById("imageUpload");
+  const file = fileInput.files[0];
+
+  if (!email || !phone) {
+    alert("Vui lòng nhập đầy đủ email và số điện thoại!");
+    return;
+  }
+
+  if (!file) {
+    alert("Vui lòng tải lên ảnh cá nhân!");
+    return;
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    alert("Kích thước ảnh vượt quá 2MB!");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const imageBase64 = e.target.result;
+
+    // Cập nhật thông tin người dùng
+    currentUser.email = email;
+    currentUser.sodienthoai = phone;
+    currentUser.imageBase64 = imageBase64; // 🟩 Lưu ảnh base64
+    currentUser.phanhoi = 1;
+
+    // Lưu vào localStorage
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    const allUsers = JSON.parse(localStorage.getItem("users")) || [];
+    const index = allUsers.findIndex(u => u.id === currentUser.id);
+    if (index !== -1) {
+      allUsers[index] = currentUser;
+      localStorage.setItem("users", JSON.stringify(allUsers));
+    }
+
+    alert("Hồ sơ của bạn đã được gửi đi và đang được xét duyệt. Vui lòng chờ phản hồi qua email.");
+  };
+
+  reader.readAsDataURL(file);
+});
+
+    function logout() {
+      localStorage.removeItem("currentUser");
+      window.location.href = "login.html";
+    }
+  </script>
+
+</body>
+</html>

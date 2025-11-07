@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "ten": "Nguyen Van A",
+    "cmnd": "0123456789",
+    "quequan": "Hà Nội",
+    "ngaysinh": "1995-06-15",
+    "matkhau": "123456",
+    "phanhoi" : 0
+  },
+  {
+    "id": 2,
+    "ten": "Tran Thi B",
+    "cmnd": "0987654321",
+    "quequan": "TP. Hồ Chí Minh",
+    "ngaysinh": "1998-09-21",
+    "matkhau": "admin123",
+    "phanhoi" : 0
+  },
+  {
+    "id": 3,
+    "ten": "Le Van C",
+    "cmnd": "0345678901",
+    "quequan": "Đà Nẵng",
+    "ngaysinh": "2000-02-05",
+    "matkhau": "654321",
+    "phanhoi" : 0
+  }
+]

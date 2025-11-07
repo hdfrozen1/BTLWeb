@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "tenChuXe": "Nguyen Van A",
+    "diaChi": "Ha Noi",
+    "soCMND": "123456789",
+    "bienSo": "29A-123.45"
+  },
+  {
+    "id": 2,
+    "tenChuXe": "Tran Thi B",
+    "diaChi": "Hai Phong",
+    "soCMND": "987654321",
+    "bienSo": "15B-678.90"
+  }
+]
